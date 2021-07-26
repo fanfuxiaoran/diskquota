@@ -16,3 +16,4 @@ INSERT INTO badquota.t1 SELECT generate_series(0, 100000);
 SELECT pg_sleep(10);
 -- expect fail
 INSERT INTO badquota.t1 SELECT generate_series(0, 10);
+SELECT schema_name, quota_in_mb, nspsize_in_bytes FROM diskquota.show_fast_schema_quota_view WHERE schema_name = 'badquota';
