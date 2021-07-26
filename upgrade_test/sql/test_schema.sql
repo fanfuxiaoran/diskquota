@@ -30,10 +30,13 @@ INSERT INTO badquota.t1 SELECT generate_series(0, 100);
 INSERT INTO badquota.a SELECT generate_series(0, 100);
 
 SELECT pg_sleep(10);
+SELECT pg_sleep(20);
 SELECT schema_name, quota_in_mb FROM diskquota.show_fast_schema_quota_view WHERE schema_name = 's1';
 SELECT schema_name, quota_in_mb, nspsize_in_bytes FROM diskquota.show_fast_schema_quota_view WHERE schema_name = 'badquota';
 
 RESET search_path;
 DROP TABLE s1.a2, badquota.a;
+SELECT pg_sleep(20);
+SELECT schema_name, quota_in_mb, nspsize_in_bytes FROM diskquota.show_fast_schema_quota_view WHERE schema_name = 'badquota';
 DROP SCHEMA s1, s2;
 
