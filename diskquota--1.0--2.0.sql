@@ -7,6 +7,8 @@ CREATE TABLE diskquota.target (
         PRIMARY KEY (primaryOid, tablespaceOid, quotatype)
 );
 
+CREATE TABLE diskquota.table_size_per_seg (tableid oid, size bigint, smallint segid, PRIMARY KEY(tableid, segid));
+
 CREATE OR REPLACE FUNCTION diskquota.set_schema_tablespace_quota(text, text, text)
 RETURNS void STRICT
 AS 'MODULE_PATHNAME'

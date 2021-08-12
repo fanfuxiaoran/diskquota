@@ -49,6 +49,7 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C;
 
 CREATE TABLE diskquota.table_size (tableid oid, size bigint, PRIMARY KEY(tableid));
+CREATE TABLE diskquota.table_size_per_seg (tableid oid, size bigint, smallint segid, PRIMARY KEY(tableid, segid));
 
 CREATE TABLE diskquota.state (state int, PRIMARY KEY(state));
 
