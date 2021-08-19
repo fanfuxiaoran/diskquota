@@ -21,7 +21,7 @@ SELECT diskquota.set_schema_tablespace_quota('spcs1_perseg', 'schemaspc_perseg',
 SELECT pg_sleep(5);
 -- expect insert success
 INSERT INTO a SELECT generate_series(1,100);
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
 
 SELECT diskquota.set_per_segment_quota('schemaspc_perseg', 0.1);
 SELECT pg_sleep(5);
@@ -38,7 +38,7 @@ ALTER TABLE spcs2_perseg.a SET SCHEMA spcs1_perseg;
 SELECT pg_sleep(5);
 -- expect insert fail
 INSERT INTO a SELECT generate_series(1,200);
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
 
 -- Test alter tablespace
 -- start_ignore
@@ -77,7 +77,7 @@ SELECT diskquota.set_schema_tablespace_quota('spcs1_perseg', 'schemaspc_perseg',
 SELECT pg_sleep(5);
 -- expect insert success
 INSERT INTO a SELECT generate_series(1,100);
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
 
 RESET search_path;
 DROP TABLE spcs1_perseg.a;

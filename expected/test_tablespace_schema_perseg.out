@@ -44,8 +44,8 @@ SELECT pg_sleep(5);
 
 -- expect insert success
 INSERT INTO a SELECT generate_series(1,100);
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
- schema_name  | tablespace_name  | quota_in_mb | nspsize_tablespcae_in_bytes 
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+ schema_name  | tablespace_name  | quota_in_mb | nspsize_tablespace_in_bytes 
 --------------+------------------+-------------+-----------------------------
  spcs1_perseg | schemaspc_perseg |          10 |                     3932160
 (1 row)
@@ -86,8 +86,8 @@ SELECT pg_sleep(5);
 -- expect insert fail
 INSERT INTO a SELECT generate_series(1,200);
 ERROR:  tablespace:schemaspc_perseg schema:spcs1_perseg diskquota exceeded per segment quota
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
- schema_name  | tablespace_name  | quota_in_mb | nspsize_tablespcae_in_bytes 
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+ schema_name  | tablespace_name  | quota_in_mb | nspsize_tablespace_in_bytes 
 --------------+------------------+-------------+-----------------------------
  spcs1_perseg | schemaspc_perseg |          10 |                     3932160
 (1 row)
@@ -184,8 +184,8 @@ SELECT pg_sleep(5);
 
 -- expect insert success
 INSERT INTO a SELECT generate_series(1,100);
-SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespcae_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
- schema_name | tablespace_name | quota_in_mb | nspsize_tablespcae_in_bytes 
+SELECT schema_name, tablespace_name, quota_in_mb, nspsize_tablespace_in_bytes FROM diskquota.show_fast_schema_tablespace_quota_view WHERE schema_name = 'spcs1_perseg' and tablespace_name ='schemaspc_perseg';
+ schema_name | tablespace_name | quota_in_mb | nspsize_tablespace_in_bytes 
 -------------+-----------------+-------------+-----------------------------
 (0 rows)
 

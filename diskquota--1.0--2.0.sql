@@ -44,7 +44,7 @@ WHERE pgc.relowner = qc.targetoid and pgc.relowner = pgr.oid and ts.tableid = pg
 GROUP BY pgc.relowner, pgr.rolname, qc.quotalimitMB;
 
 CREATE OR REPLACE VIEW diskquota.show_fast_schema_tablespace_quota_view AS
-select pgns.nspname as schema_name, pgc.relnamespace as schema_oid, pgsp.spcname as tablespace_name, pgc.reltablespace as tablespace_oid, qc.quotalimitMB as quota_in_mb, sum(ts.size) as nspsize_tablespcae_in_bytes
+select pgns.nspname as schema_name, pgc.relnamespace as schema_oid, pgsp.spcname as tablespace_name, pgc.reltablespace as tablespace_oid, qc.quotalimitMB as quota_in_mb, sum(ts.size) as nspsize_tablespace_in_bytes
 from diskquota.table_size as ts,
         pg_class as pgc,
         diskquota.quota_config as qc,
