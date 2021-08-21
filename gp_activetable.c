@@ -274,7 +274,7 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 	/* Init the container list in the first call and get the results back */
 	if (SRF_IS_FIRSTCALL())
 	{
-		//MemoryContext oldcontext;
+		MemoryContext oldcontext;
 		TupleDesc	tupdesc;
 		char		*extversion;
 		if (SPI_OK_CONNECT != SPI_connect())
@@ -284,13 +284,12 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 					 errmsg("unable to connect to execute internal query")));
 		}
 		extversion = get_extversion();
-		SPI_finish();
 
 		/* create a function context for cross-call persistence */
 		funcctx = SRF_FIRSTCALL_INIT();
 
 		/* switch to memory context appropriate for multiple function calls */
-		//oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+		oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
 		if (Gp_role == GP_ROLE_DISPATCH || Gp_role == GP_ROLE_UTILITY)
 		{
@@ -338,7 +337,6 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 					(errcode(ERRCODE_INTERNAL_ERROR),
 					 errmsg("[diskquota] unknown diskquota extension version: %s", extversion)));
 		}
-		pfree(extversion);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 1, "TABLE_OID",
 						   OIDOID, -1, 0);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 2, "TABLE_SIZE",
@@ -352,7 +350,9 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 		cache->result = localCacheTable;
 		hash_seq_init(&(cache->pos), localCacheTable);
 
-		//MemoryContextSwitchTo(oldcontext);
+		MemoryContextSwitchTo(oldcontext);
+		/* SPI_finish should be called after the extversion not be used any more */
+		SPI_finish();
 	}
 	else
 	{
@@ -633,7 +633,7 @@ load_table_size(HTAB *local_table_stats_map)
 
 	if (strcmp(extversion, "1.0") == 0)
 	{
-		ret = SPI_execute("select tableid, size, -1 from diskquota.table_size", true, 0);
+		ret = SPI_execute("select tableid, size, CAST(-1 AS smallint) from diskquota.table_size", true, 0);
 
 	}
 	else if (strcmp(extversion,"2.0") == 0)
