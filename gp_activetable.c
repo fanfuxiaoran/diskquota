@@ -277,13 +277,17 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 		MemoryContext oldcontext;
 		TupleDesc	tupdesc;
 		char		*extversion;
+		char		*tmp_extversion;
 		if (SPI_OK_CONNECT != SPI_connect())
 		{
 			ereport(ERROR,
 					(errcode(ERRCODE_INTERNAL_ERROR),
 					 errmsg("unable to connect to execute internal query")));
 		}
-		extversion = get_extversion();
+		tmp_extversion = get_extversion();
+		extversion = (char *)SPI_palloc(strlen(tmp_extversion));
+		strcpy(extversion, tmp_extversion);
+		SPI_finish();
 
 		/* create a function context for cross-call persistence */
 		funcctx = SRF_FIRSTCALL_INIT();
@@ -331,7 +335,6 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 		}
 		else
 		{
-			elog(INFO, "diskquota version is uncorrect %s", extversion);
 
 			ereport(ERROR,
 					(errcode(ERRCODE_INTERNAL_ERROR),
@@ -351,8 +354,7 @@ diskquota_fetch_table_stat(PG_FUNCTION_ARGS)
 		hash_seq_init(&(cache->pos), localCacheTable);
 
 		MemoryContextSwitchTo(oldcontext);
-		/* SPI_finish should be called after the extversion not be used any more */
-		SPI_finish();
+		pfree(extversion);
 	}
 	else
 	{
@@ -860,11 +862,11 @@ pull_active_table_size_from_seg(HTAB *local_table_stats_map, char *active_oid_ar
 		{
 			reloid = atooid(PQgetvalue(pgresult, j, 0));
 			tableSize = (Size) atoll(PQgetvalue(pgresult, j, 1));
+			key.reloid = reloid;
 			/* for diskquota extension version is 1.0, pgresult doesn't contain segid */
 			if (PQnfields(pgresult) == 3)
 			{
 				segId = atoi(PQgetvalue(pgresult, j, 2));
-				key.reloid = reloid;
 				key.segid = segId;
 
 				entry = (DiskQuotaActiveTableEntry *) hash_search(

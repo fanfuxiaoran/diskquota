@@ -807,7 +807,6 @@ calculate_table_disk_usage(bool is_init)
 		if (relOid < FirstNormalObjectId)
 			continue;
 
-		/*FIXME: If gp_segment_id is continue */
 		for (int i = -1; i < SEGCOUNT; i++)
 		{
 			key.segid = i;
