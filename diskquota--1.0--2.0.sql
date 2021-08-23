@@ -7,7 +7,6 @@ CREATE TABLE diskquota.target (
         PRIMARY KEY (primaryOid, tablespaceOid, quotatype)
 );
 
-CREATE TABLE diskquota.table_size_per_seg (tableid oid, size bigint, smallint segid, PRIMARY KEY(tableid, segid));
 
 CREATE OR REPLACE FUNCTION diskquota.set_schema_tablespace_quota(text, text, text)
 RETURNS void STRICT
@@ -24,13 +23,15 @@ RETURNS void STRICT
 AS 'MODULE_PATHNAME'
 LANGUAGE C;
 
+ALTER TABLE diskquota.table_size ADD COLUMN segid smallint DEFAULT -1;
+
 CREATE OR REPLACE VIEW diskquota.show_fast_schema_quota_view AS
 select pgns.nspname as schema_name, pgc.relnamespace as schema_oid, qc.quotalimitMB as quota_in_mb, sum(ts.size) as nspsize_in_bytes
 from diskquota.table_size as ts,
         pg_class as pgc,
         diskquota.quota_config as qc,
         pg_namespace as pgns
-where ts.tableid = pgc.oid and qc.targetoid = pgc.relnamespace and pgns.oid = pgc.relnamespace and qc.quotatype=0
+where ts.tableid = pgc.oid and qc.targetoid = pgc.relnamespace and pgns.oid = pgc.relnamespace and qc.quotatype=0 and ts.segid=-1
 group by relnamespace, qc.quotalimitMB, pgns.nspname
 order by pgns.nspname;
 
@@ -40,7 +41,7 @@ from diskquota.table_size as ts,
         pg_class as pgc,
         diskquota.quota_config as qc,
         pg_roles as pgr
-WHERE pgc.relowner = qc.targetoid and pgc.relowner = pgr.oid and ts.tableid = pgc.oid and qc.quotatype=1
+WHERE pgc.relowner = qc.targetoid and pgc.relowner = pgr.oid and ts.tableid = pgc.oid and qc.quotatype=1 and ts.segid=-1
 GROUP BY pgc.relowner, pgr.rolname, qc.quotalimitMB;
 
 CREATE OR REPLACE VIEW diskquota.show_fast_schema_tablespace_quota_view AS
@@ -51,7 +52,7 @@ from diskquota.table_size as ts,
         pg_namespace as pgns,
 	pg_tablespace as pgsp,
 	diskquota.target as t
-where ts.tableid = pgc.oid and qc.targetoid = pgc.relnamespace and pgns.oid = pgc.relnamespace and pgsp.oid = pgc.reltablespace and qc.quotatype=2 and qc.targetoid=t.primaryoid and t.tablespaceoid=pgc.reltablespace
+where ts.tableid = pgc.oid and qc.targetoid = pgc.relnamespace and pgns.oid = pgc.relnamespace and pgsp.oid = pgc.reltablespace and qc.quotatype=2 and qc.targetoid=t.primaryoid and t.tablespaceoid=pgc.reltablespace and ts.segid=-1
 group by relnamespace, reltablespace, qc.quotalimitMB, pgns.nspname, pgsp.spcname
 order by pgns.nspname, pgsp.spcname;
 
@@ -63,5 +64,7 @@ from diskquota.table_size as ts,
         pg_roles as pgr,
 	pg_tablespace as pgsp,
         diskquota.target as t
-WHERE pgc.relowner = qc.targetoid and pgc.relowner = pgr.oid and ts.tableid = pgc.oid and pgsp.oid = pgc.reltablespace and qc.quotatype=3 and qc.targetoid=t.primaryoid and t.tablespaceoid=pgc.reltablespace
+WHERE pgc.relowner = qc.targetoid and pgc.relowner = pgr.oid and ts.tableid = pgc.oid and pgsp.oid = pgc.reltablespace and qc.quotatype=3 and qc.targetoid=t.primaryoid and t.tablespaceoid=pgc.reltablespace and ts.segid=-1
 GROUP BY pgc.relowner, reltablespace, pgr.rolname, pgsp.spcname, qc.quotalimitMB;
+
+ALTER TYPE diskquota.diskquota_active_table_type ADD ATTRIBUTE "GP_SEGMENT_ID" smallint;
