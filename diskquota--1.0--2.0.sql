@@ -24,6 +24,8 @@ AS 'MODULE_PATHNAME'
 LANGUAGE C;
 
 ALTER TABLE diskquota.table_size ADD COLUMN segid smallint DEFAULT -1;
+ALTER TABLE diskquota.table_size DROP CONSTRAINT table_size_pkey;
+ALTER TABLE diskquota.table_size ADD PRIMARY KEY (tableid,segid);
 
 CREATE OR REPLACE VIEW diskquota.show_fast_schema_quota_view AS
 select pgns.nspname as schema_name, pgc.relnamespace as schema_oid, qc.quotalimitMB as quota_in_mb, sum(ts.size) as nspsize_in_bytes
